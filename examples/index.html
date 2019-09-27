@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    .demo {
+      width: 500px;
+      height: 400px;
+      background-color: #000;
+      margin: 100px auto;
+      overflow: hidden;
+      transition: all .2s ;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="demo" id="demo"></div>
+  <button id="retry">重试</button>
+  <select name="" id="effect-types" style="padding: 10px; width: 500px; margin: 30px auto; display: block;"></select>
+
+
+  <script>
+    window.onload = function () {
+      const $effectSelect = document.getElementById('effect-types')
+      const fragment = document.createDocumentFragment()
+      ;['PullInUp' ,
+  'PullInDown' ,
+  'PullInLeft' ,
+  'PullInRight' ,
+  'ZoomIn' ,
+  'ZommInX' ,
+  'ZoomInY' ,
+  'SlideInUp' ,
+  'SlideInDown' ,
+  'SlideInLeft' ,
+  'SlideInRight' ,
+  'PressInUp' ,
+  'PressInDown' ,
+  'PressInLeft' ,
+  'PressInRight' ,
+  'PressInX' ,
+  'PressInY' ,
+  'UncoverFromTop' ,
+  'UncoverFromBottom' ,
+  'ShutterX' ,
+  'ShutterY' ,
+  'ZoomFullScreen' ,
+  'Wheel' ,
+  'Tooth',
+  'FadeIn' ,
+  'StackInTop' ,
+  'StackInBottom' ,
+  'StackInLeft' ,
+  'StackInRight' ,
+  'TopLaser' ,
+  'BottomLaser' ,
+  'RightLaser' ,
+  'LeftLaser'].forEach(type => {
+        const option = new Option(type, type)
+        fragment.appendChild(option)
+      })
+      $effectSelect.appendChild(fragment)
+    }
+  </script>
+</body>
+</html>
