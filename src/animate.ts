@@ -5,14 +5,14 @@ export interface animateHandler {
 }
 
 /**
- * engine
+ * animate
  * @param handler 
  * @param duration 
  * @param easing 
  * @param complete 
  * @return Function
  */
-export const engine = (handler: animateHandler, duration: number, easing: TweenHandler = Tween.linear, complete?: Function): Function => {
+export const animate = (handler: animateHandler, duration: number, easing: TweenHandler = Tween.linear, complete?: Function): Function => {
   const start = performance.now()
   let raf: number
   const play = () => {
@@ -36,4 +36,4 @@ export const engine = (handler: animateHandler, duration: number, easing: TweenH
 }
 
 
-export default engine
+export default animate

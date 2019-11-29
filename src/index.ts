@@ -234,7 +234,8 @@
 // NoneRandomPush from leftPush from topPush from rightPush from bottomZoom inSplit (vertical out)Split (horizontal out)Pan from leftPan from topPan from rightPan from bottomIndent from leftIndent from topIndent from rightIndent from bottomIndent (vertical in)Indent (horizontal in)Uncover from topUncover from bottomHorizontal blindsVertical blindsSplit and expand from bottomWheelComb (vertical)Fade inFADE_OUTStack from leftStack from topStack from rightStack from bottomLeft laserTop laserRight laserBottom laserCover from topCover from bottomCover (vertical out)Cover (vertical in)
 
 import { engine } from './engine'
-import { AnimateProps, animateFadeIn, animateShutter, animateUncover, animateWheel, animateTooth, animateZoomFullScreen, animateStackIn } from './effects'
+import { TweenHandler } from './tween'
+import { AnimateProps, animateFade, animateShutter, animateUncover, animateWheel, animateTooth, animateZoomFullScreen, animateStackIn, animatePullAndSlider } from './effects'
 
 type EffectType =
   // [扩展] 上下左右/中间向外/水平/垂直
@@ -304,6 +305,7 @@ export interface Props {
   perPageDuration?: number | number
   width?: number
   height?: number
+  easing?: TweenHandler
 }
 
 
@@ -387,8 +389,9 @@ const animate = function (this: Effect, type?: EffectType) {
     img: states.imgs[states.index],
     width: props.width,
     height: props.height,
-    speed: props.speed,
-    type
+    duration: props.speed,
+    type,
+    easing: props.easing,
   }
 
   let play
@@ -401,19 +404,17 @@ const animate = function (this: Effect, type?: EffectType) {
     case 'ZoomIn':
     case 'ZommInX':
     case 'ZoomInY':
-      break
     case 'SlideInUp':
     case 'SlideInDown':
     case 'SlideInLeft':
     case 'SlideInRight':
-      break
     case 'PressInUp':
     case 'PressInDown':
     case 'PressInLeft':
     case 'PressInRight':
-      break
     case 'PressInX':
     case 'PressInY':
+      play = animatePullAndSlider(animateProps)
       break
     case 'UncoverFromTop':
     case 'UncoverFromBottom':
@@ -433,7 +434,7 @@ const animate = function (this: Effect, type?: EffectType) {
       play = animateTooth(animateProps)
       break
     case 'FadeIn':
-      play = animateFadeIn(animateProps)
+      play = animateFade(animateProps)
       break
     case 'StackInTop':
     case 'StackInBottom':
@@ -489,8 +490,8 @@ export class Effect {
 const effect = new Effect(
   {
     el: document.getElementById('demo'),
-    type: 'FadeIn',
-    speed: 5000,
+    type: 'PullInRight',
+    speed: 3000,
     duration: 60 * 1000,
     images: ['https://smohan.oss-cn-beijing.aliyuncs.com/test/boy-child-cute-35537.jpg']
   }
