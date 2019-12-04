@@ -274,8 +274,9 @@ type EffectType =
   'Wheel' |
   // 上下齿合
   'Tooth' |
-  // 淡入
+  // 淡入淡出
   'FadeIn' |
+  'FadeOut' |
   // [堆积] 上下左右 
   'StackInTop' |
   'StackInBottom' |
@@ -434,6 +435,7 @@ const animate = function (this: Effect, type?: EffectType) {
       play = animateTooth(animateProps)
       break
     case 'FadeIn':
+    case 'FadeOut':
       play = animateFade(animateProps)
       break
     case 'StackInTop':
@@ -490,7 +492,7 @@ export class Effect {
 const effect = new Effect(
   {
     el: document.getElementById('demo'),
-    type: 'PullInRight',
+    type: 'UncoverFromTop',
     speed: 3000,
     duration: 60 * 1000,
     images: ['https://smohan.oss-cn-beijing.aliyuncs.com/test/boy-child-cute-35537.jpg']
