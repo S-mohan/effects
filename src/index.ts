@@ -2,6 +2,7 @@ import { engine } from './engine'
 import Tween, { TweenHandler } from './tween'
 import { AnimateProps, animateFade, animateShutter, animateUncover, animateWheel, animateTooth, animateZoomFullScreen, animateStackIn, animatePullAndSlider } from './effects'
 
+// 支持的类型
 type EffectType =
   'Random' |
   // [扩展] 上下左右/中间向外/水平/垂直
@@ -117,7 +118,13 @@ interface WithCustormPropsElement extends HTMLElement {
   __effect_wrap__?: HTMLElement
 }
 
-
+/**
+ * 创建canvas包裹容器
+ * @param el 
+ * @param width 
+ * @param height 
+ * @param options 
+ */
 const createWrap = (el: WithCustormPropsElement, width?: number, height?: number, options?: Props): WithCustormPropsElement => {
   if (width === void 0) {
     width = el.offsetWidth
@@ -136,14 +143,25 @@ const createWrap = (el: WithCustormPropsElement, width?: number, height?: number
   return $wrap
 }
 
+const IMAGE_CACHES = new Map()
 
+/**
+ * 加载图片
+ * @param image 
+ */
 const loadImage = (image: string | HTMLImageElement | File): Promise<HTMLImageElement> => {
   return new Promise<HTMLImageElement| null>(resolve => {
+
+    if (IMAGE_CACHES.has(image)) {
+      resolve(IMAGE_CACHES.get(image))
+    }
+
     if (typeof image === 'string') {
       const img = new Image()
       img.crossOrigin = ''
       img.src = image
       img.onload = function () {
+        IMAGE_CACHES.set(image, this)
         resolve(this as HTMLImageElement)
       }
       img.onerror = () => resolve(null) // 或者默认图片
@@ -154,15 +172,24 @@ const loadImage = (image: string | HTMLImageElement | File): Promise<HTMLImageEl
       reader.onload = function(event){
         const img = new Image()
         img.src = event.target.result as string
+        IMAGE_CACHES.set(image, img)
         resolve(img)
       }
     }
     else {
+      IMAGE_CACHES.set(image, image)
       resolve(image)
     }
   })
 }
 
+
+/**
+ * 动画入口函数
+ * @param $wrap 
+ * @param image 
+ * @param options 
+ */
 const animate = function ($wrap: WithCustormPropsElement, image: HTMLImageElement, options: Props) {
   let { type, width, height, duration, easing } = options
 
@@ -251,29 +278,12 @@ export class Effect {
       })
   }
 
+  static destroy () {
+    IMAGE_CACHES.clear()
+  }
+
   static engine = engine
   static Tween = Tween
 }
 
 export default Effect
-
-// const effect = new Effect(
-//   {
-//     el: document.getElementById('demo'),
-//     type: 'StackInRight',
-//     speed: 3000,
-//     duration: 60 * 1000,
-//     images: ['https://smohan.oss-cn-beijing.aliyuncs.com/test/boy-child-cute-35537.jpg']
-//   }
-// )
-
-// effect.animate()
-
-// const $types = document.getElementById('effect-types') as HTMLSelectElement
-// $types.addEventListener('change', function () {
-//   effect.animate(this.value as EffectType)
-// })
-
-// document.getElementById('retry').addEventListener('click', function () {
-//   effect.animate($types.value as EffectType)
-// })
