@@ -14,13 +14,19 @@ export interface AnimateCallback {
   (): void
 }
 
-
 const DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1
-
 const PRESS_RATIO = 15
 const UNCOVER_SIZE = 30
 const TOOTH_COUNT = 8
+const STACK_SCALE = 4
+const SHUTTER_COUNT = 20
+const LASER_SCALE = 25
 
+/**
+ * 获取真实物理像素，解决高清屏模糊
+ * @param width 
+ * @param height 
+ */
 const getRatioSize = (width: number, height: number) => {
   const ratio = DEVICE_PIXEL_RATIO / 1
   return {
@@ -29,7 +35,12 @@ const getRatioSize = (width: number, height: number) => {
   }
 }
 
-
+/**
+ * 创建canvas对象
+ * @param width 
+ * @param height 
+ * @param img 
+ */
 const createCanvas = (width: number, height: number, img?: HTMLImageElement): HTMLCanvasElement => {
   const canvas = document.createElement('canvas')
   const { RW, RH } = getRatioSize(width, height)
@@ -44,7 +55,13 @@ const createCanvas = (width: number, height: number, img?: HTMLImageElement): HT
   return canvas
 }
 
-
+/**
+ * 在容器中填充canvas
+ * @param $el 
+ * @param width 
+ * @param height 
+ * @param img 
+ */
 export const fillCanvasBeforePlay = ($el: HTMLElement, width: number, height: number, img?: HTMLImageElement): HTMLCanvasElement => {
   const canvas = createCanvas(width, height, img)
   $el.innerHTML = ''
@@ -52,6 +69,11 @@ export const fillCanvasBeforePlay = ($el: HTMLElement, width: number, height: nu
   return canvas
 }
 
+/**
+ * 获取一个反转后的ImageData
+ * @param source 
+ * @param target 
+ */
 const getRevertImageData = (source: ImageData, target: ImageData) => {
   for (let i = 0, h = source.height; i < h; i++) {
     for (let j = 0, w = source.width; j < w; j++) {
@@ -64,7 +86,14 @@ const getRevertImageData = (source: ImageData, target: ImageData) => {
   return target
 }
 
-
+/**
+ * 使用CSS动画的方式，
+ * 获取即时的transform样式
+ * @param type 
+ * @param progress 
+ * @param width 
+ * @param height 
+ */
 const getTransformCssText = (type: string, progress: number, width: number, height: number) => {
   let transform = 'left top'
   let origin
@@ -142,7 +171,7 @@ const getTransformCssText = (type: string, progress: number, width: number, heig
   return `transform-origin:${origin}; transform:${transform};`
 }
 
-// pull/slider
+// 扩展和平移(动画使用CSS)
 export const animatePullAndSlider = (props: AnimateProps): Function => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height, img)
@@ -151,21 +180,50 @@ export const animatePullAndSlider = (props: AnimateProps): Function => {
   return engine(handler, duration, easing)
 }
 
-
-// fade
+// 渐隐渐现(动画使用CSS)
 export const animateFade = (props: AnimateProps): Function => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height, img)
   const fadeIn = type === 'FadeIn'
   canvas.style.opacity = fadeIn ? '0' : '1'
-  const handler = (progress: number) => canvas.style.opacity =  fadeIn ? `${progress}` : `${1 - progress}`
+  const handler = (progress: number) => canvas.style.opacity = fadeIn ? `${progress}` : `${1 - progress}`
   return engine(handler, duration, easing, () => {
     canvas.style.opacity = ''
   })
 }
 
+// 百叶窗
 export const animateShutter = (props: AnimateProps): Function => {
-  return
+  const { $el, width, height, img, duration, easing, type } = props
+  const canvas = fillCanvasBeforePlay($el, width, height)
+  const ctx = canvas.getContext('2d')
+  let helper = createCanvas(width, height, img)
+  let helperCtx = helper.getContext('2d')
+  const { RW, RH } = getRatioSize(width, height)
+
+  const isX = type === 'ShutterX'
+  const perSize = Math.ceil((isX ? RH : RW) / SHUTTER_COUNT)
+
+  const handler = (progress: number) => {
+    ctx.clearRect(0, 0, RW, RH)
+    for (let i = 0; i < SHUTTER_COUNT; i++) {
+      const pos = i * perSize
+      const val = progress * perSize
+      const x = isX ? 0 : pos
+      const y = isX ? pos : 0
+      const w = isX ? RW : val
+      const h = isX ? val : RH
+      if (val >= 1) {
+        const imageData = helperCtx.getImageData(x, y, w, h)
+        ctx.putImageData(imageData, x, y)
+      }
+    }
+  }
+
+  return engine(handler, duration, easing, () => {
+    helper = null
+    helperCtx = null
+  })
 }
 
 // 卷轴
@@ -309,8 +367,118 @@ export const animateZoomFullScreen = (props: AnimateProps): Function => {
   })
 }
 
-// 堆积
+// 堆积和镭射
 export const animateStackIn = (props: AnimateProps): Function => {
+  const { $el, width, height, img, duration, easing, type } = props
+  const canvas = fillCanvasBeforePlay($el, width, height)
+  const ctx = canvas.getContext('2d')
+  const { RW, RH } = getRatioSize(width, height)
+  let SW = width
+  let SH = height
+  switch (type) {
+    case 'StackInTop':
+    case 'StackInBottom':
+      SH = RH * STACK_SCALE
+      break
+    case 'TopLaser':
+    case 'BottomLaser':
+      SH = RH * LASER_SCALE
+      break
+    case 'StackInLeft':
+    case 'StackInRight':
+      SW = RW * STACK_SCALE
+      break
+    case 'LeftLaser':
+    case 'RightLaser':
+      SW = RW * LASER_SCALE
+      break
+  }
+  // 拉伸后的图
+  let helper = createCanvas(SW, SH, img)
+  let helperCtx = helper.getContext('2d')
+  const fixedRect = getRatioSize(SW, SH)
+  SW = fixedRect.RW
+  SH = fixedRect.RH
+  const isHorizontal = SW > RW
+  const isVertical = SH > RH
+  const handler = (progress: number) => {
+    ctx.clearRect(0, 0, RW, RH)
+    let sx, sy, sw, sh, dx, dy, dw, dh
+    let isToLeft = false
+    let isToTop = false
+    if (progress === 0) {
+      return
+    }
+    switch (type) {
+      case 'StackInLeft':
+      case 'RightLaser':
+        sw = SW * progress
+        dw = RW * progress
+        sh = SH
+        dh = RH
+        sx = 0
+        sy = 0
+        dx = 0
+        dy = 0
+        isToLeft = true
+        break
+      case 'StackInRight':
+      case 'LeftLaser':
+        sw = SW * progress
+        dw = RW * progress
+        sh = SH
+        dh = RH
+        sx = SW - sw
+        sy = 0
+        dx = RW - dw
+        dy = 0
+        break
+      case 'StackInTop':
+      case 'BottomLaser':
+        sw = SW
+        dw = RW
+        sh = SH * progress
+        dh = RH * progress
+        sx = 0
+        sy = 0
+        dx = 0
+        dy = 0
+        isToTop = true
+        break
+      case 'StackInBottom':
+      case 'TopLaser':
+        sw = SW
+        dw = RW
+        sh = SH * progress
+        dh = RH * progress
+        sx = 0
+        sy = SH - sh
+        dx = 0
+        dy = RH - dh
+        break
+    }
+    ctx.drawImage(helper, sx, sy, sw, sh, dx, dy, dw, dh)
 
-  return
+    // 水平方向
+    if (isHorizontal) {
+      const pw = SW - sw
+      const psx = isToLeft ? SW - pw : 0
+      const pdx = isToLeft ? dw : (dx - sx)
+      const imageData = helperCtx.getImageData(psx, 0, pw + 1, RH)
+      ctx.putImageData(imageData, pdx, 0)
+    }
+    // 垂直方向
+    else if (isVertical) {
+      const ph = SH - sh
+      const psy = isToTop ? SH - ph : 0
+      const pdy = isToTop ? dh : (dy - sy)
+      const imageData = helperCtx.getImageData(0, psy, RW, ph + 1)
+      ctx.putImageData(imageData, 0, pdy)
+    }
+  }
+
+  return engine(handler, duration, easing, () => {
+    helper = null
+    helperCtx = null
+  })
 }

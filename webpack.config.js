@@ -7,7 +7,7 @@ const config = {
   entry: './src/index.ts',
   mode: isDev ? 'development' : 'production',
   output: {
-    path: path.resolve(__dirname, './dist/'),
+    path: path.resolve(__dirname, isDev ? './dist/' : './docs/'),
     filename: isDev ? 'mo.effects.js' : 'mo.effects.[hash:7].js',
     publicPath: '/',
     library: 'MoEffects',
@@ -35,23 +35,24 @@ const config = {
   },
   plugins: [],
 }
+config.plugins.push(
+  new HtmlWebpackPlugin({
+    filename: isDev ? 'index.html' : path.resolve(__dirname, './docs/index.html'),
+    template: path.resolve(__dirname, './examples/index.html'),
+    chunks: true,
+    minify: {
+      removeComments: true,
+      collapseWhitespace: true,
+      removeAttributeQuotes: false,
+      minifyCSS: true,
+      minifyJS: true
+    },
+  })
+)
 
 // 配置devserver
 if (isDev) {
-  config.plugins.push(
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.resolve(__dirname, './examples/index.html'),
-      chunks: true,
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        removeAttributeQuotes: false,
-        minifyCSS: true,
-        minifyJS: true
-      },
-    })
-  )
+  
   config.devtool = 'inline-source-map'
   config.devServer = {
     contentBase: path.join(__dirname, 'dist'),
