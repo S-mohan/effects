@@ -7,8 +7,9 @@
     "example": "examples"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "build": "rm -rf docs && cross-env NODE_ENV=production webpack"
+    "start": "webpack-dev-server --env=development --mode=development",
+    "docs": "rm -rf docs && webpack --env=documents --mode=production",
+    "build": "rm -rf dist && webpack --env=production --mode=production"
   },
   "repository": {
     "type": "git",
