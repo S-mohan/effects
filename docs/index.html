@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><title>翻页特效</title><style>body,html{width:100%;height:100%;overflow:hidden}body{margin:0;padding:0;font-family:PingFang SC,Hiragino Sans GB,Microsoft YaHei,Arial,Helvetica Neue,Helvetica;font-size:14px;line-height:1.5;margin:0;padding:0;color:#333}.container *{box-sizing:border-box}.container{width:100%;height:100%;display:flex;flex-flow:row nowrap}.main{flex:1;border-right:1px solid #ddd;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}.main figure{background-color:#010101}.effects,.props{width:240px;overflow-x:hidden;overflow-y:auto;padding-bottom:20px}.props{width:301px;border-right:1px solid #ddd}.effects-title,.props-title{font-size:20px;margin:0 0 10px 0;padding:10px 20px;color:#000;position:sticky;top:0;width:100%;background-color:#f8f8f8;border-bottom:1px solid #ddd}.props-item{display:flex;align-items:center;padding:0 20px}.props-item+.props-item{margin-top:15px}.props-item .label{width:100px;padding-right:10px;line-height:34px;color:#888}.props-item .value{flex:1}.props-item .value.has-unit{position:relative;padding-right:30px}.props-item .value.has-unit::after{position:absolute;right:0;top:0;line-height:34px}.props-item .value.ms::after{content:'ms'}.props-item .value.px::after{content:'px'}.props-item input,.props-item select{width:100%;height:34px;border:1px solid #ccc;background-color:#fff;padding:5px 8px;line-height:20px}.props-item button{display:block;width:100%;height:40px;border:1px solid #5196f2;color:#fff;background-color:#5196f2;outline:0;cursor:pointer}.props-item button:active,.props-item button:hover{border-color:#257cef;background-color:#257cef}.effect-group{padding:0 20px}.effect-group .effect-group__title{font-size:16px;margin:10px 0;padding:0;cursor:pointer;font-weight:700;user-select:none}.effect-group .effect-group__items{margin:5px 0 0 0;padding:0;list-style:none;user-select:none}.effect-group .effect-item{line-height:20px;padding:5px 15px;cursor:pointer}.effect-group .effect-item:active,.effect-group .effect-item:hover{background-color:#f0f0f0}.effect-group .effect-item.actived{background-color:#f0f0f0;color:brown;font-weight:700}.uploader{width:100%;height:34px;cursor:pointer;position:relative;margin:0;padding:0;display:block}.uploader input[type=file]{opacity:0;position:absolute;cursor:pointer}.uploader .toggle{display:block;width:100%;height:34px;border:1px solid #ddd;text-align:center;line-height:20px;padding:6px 10px;cursor:pointer;position:relative;z-index:1}.recovery{line-height:20px;color:#257cef;cursor:pointer}</style></head><body><article class="container"><main class="main"><div class="canvas" id="canvas"></div></main><aside class="props"><h2 class="effects-title">属性</h2><div class="props-item"><span class="label">特效时长</span><div class="value has-unit ms"><input type="number" min="0" max="600000" step="10" value="2000" id="fd-duration"></div></div><div class="props-item"><span class="label">容器宽度</span><div class="value has-unit px"><input type="number" min="100" max="1024" step="5" value="500" id="fd-width"></div></div><div class="props-item"><span class="label">容器高度</span><div class="value has-unit px"><input type="number" min="100" max="1024" step="5" value="500" id="fd-height"></div></div><div class="props-item"><span class="label">缓动类型</span><div class="value"><select id="fd-easing"><option value="linear">linear</option><option value="quadraticIn">ease-in</option><option value="quadraticOut">ease-out</option><option value="quadraticInOut">ease-in-out</option><option value="cubicIn">cubic-in</option><option value="cubicOut">cubic-out</option><option value="cubicInOut">cubic-in-out</option><option value="quarticIn">quartic-in</option><option value="quarticOut">quartic-out</option><option value="quarticInOut">quartic-in-out</option><option value="circularIn">circular-in</option><option value="circularOut">circular-out</option><option value="circularInOut">circularin-out</option><option value="elasticIn">elastic-in</option><option value="elasticOut">elastic-out</option><option value="elasticInOut">elastic-in-out</option><option value="bounceIn">bounce-in</option><option value="bounceOut">bounce-out</option><option value="bounceInOut">bounce-in-out</option></select></div></div><div class="props-item"><span class="label">选择图片</span><div class="value"><label class="uploader"><input type="file" accept="image/*" id="customImage"> <span class="toggle" role="button">选择图片</span></label></div></div><div class="props-item"><span class="label">&nbsp;</span><div class="value"><a class="recovery" id="recoveryImage" role="button">恢复默认图片</a></div></div><div class="props-item"><button type="button" id="play">播放</button></div></aside><aside class="effects" id="effectViewport"><h2 class="effects-title">特效</h2><div id="effects-wrap"></div></aside></article><script>const effects = [
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><title>翻页特效</title><style>body,html{width:100%;height:100%;overflow:hidden}body{margin:0;padding:0;font-family:PingFang SC,Hiragino Sans GB,Microsoft YaHei,Arial,Helvetica Neue,Helvetica;font-size:14px;line-height:1.5;margin:0;padding:0;color:#333}.container *{box-sizing:border-box}.container{width:100%;height:100%;display:flex;flex-flow:row nowrap}.main{flex:1;border-right:1px solid #ddd;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}.main figure{background-color:#010101}.effects,.props{width:240px;overflow-x:hidden;overflow-y:auto;padding-bottom:20px}.props{width:301px;border-right:1px solid #ddd}.effects-title,.props-title{font-size:20px;margin:0 0 10px 0;padding:10px 20px;color:#000;position:sticky;top:0;width:100%;background-color:#f8f8f8;border-bottom:1px solid #ddd}.props-item{display:flex;align-items:center;padding:0 20px}.props-item+.props-item{margin-top:15px}.props-item .label{width:100px;padding-right:10px;line-height:34px;color:#888}.props-item .value{flex:1}.props-item .value.has-unit{position:relative;padding-right:30px}.props-item .value.has-unit::after{position:absolute;right:0;top:0;line-height:34px}.props-item .value.ms::after{content:'ms'}.props-item .value.px::after{content:'px'}.props-item input,.props-item select{width:100%;height:34px;border:1px solid #ccc;background-color:#fff;padding:5px 8px;line-height:20px}.props-item input[type=checkbox]{width:20px;height:20px;position:relative;cursor:pointer}.props-item button{display:block;width:100%;height:40px;border:1px solid #5196f2;color:#fff;background-color:#5196f2;outline:0;cursor:pointer}.props-item button:active,.props-item button:hover{border-color:#257cef;background-color:#257cef}.effect-group{padding:0 20px}.effect-group .effect-group__title{font-size:16px;margin:10px 0;padding:0;cursor:pointer;font-weight:700;user-select:none}.effect-group .effect-group__items{margin:5px 0 0 0;padding:0;list-style:none;user-select:none}.effect-group .effect-item{line-height:20px;padding:5px 15px;cursor:pointer}.effect-group .effect-item:active,.effect-group .effect-item:hover{background-color:#f0f0f0}.effect-group .effect-item.actived{background-color:#f0f0f0;color:brown;font-weight:700}.uploader{width:100%;height:34px;cursor:pointer;position:relative;margin:0;padding:0;display:block}.uploader input[type=file]{opacity:0;position:absolute;cursor:pointer}.uploader .toggle{display:block;width:100%;height:34px;border:1px solid #ddd;text-align:center;line-height:20px;padding:6px 10px;cursor:pointer;position:relative;z-index:1}.recovery{line-height:20px;color:#257cef;cursor:pointer}</style></head><body><article class="container"><main class="main"><div class="canvas" id="canvas"></div></main><aside class="props"><h2 class="effects-title">属性</h2><div class="props-item"><span class="label">特效时长</span><div class="value has-unit ms"><input type="number" min="0" max="600000" step="10" value="2000" id="fd-duration"></div></div><div class="props-item"><span class="label">容器宽度</span><div class="value has-unit px"><input type="number" min="100" max="1024" step="5" value="500" id="fd-width"></div></div><div class="props-item"><span class="label">容器高度</span><div class="value has-unit px"><input type="number" min="100" max="1024" step="5" value="500" id="fd-height"></div></div><div class="props-item"><span class="label">缓动类型</span><div class="value"><select id="fd-easing"><option value="linear">linear</option><option value="quadraticIn">ease-in</option><option value="quadraticOut">ease-out</option><option value="quadraticInOut">ease-in-out</option><option value="cubicIn">cubic-in</option><option value="cubicOut">cubic-out</option><option value="cubicInOut">cubic-in-out</option><option value="quarticIn">quartic-in</option><option value="quarticOut">quartic-out</option><option value="quarticInOut">quartic-in-out</option><option value="circularIn">circular-in</option><option value="circularOut">circular-out</option><option value="circularInOut">circularin-out</option><option value="elasticIn">elastic-in</option><option value="elasticOut">elastic-out</option><option value="elasticInOut">elastic-in-out</option><option value="bounceIn">bounce-in</option><option value="bounceOut">bounce-out</option><option value="bounceInOut">bounce-in-out</option></select></div></div><div class="props-item"><span class="label">选择图片</span><div class="value"><label class="uploader"><input type="file" accept="image/*" id="customImage"> <span class="toggle" role="button">选择图片</span></label></div></div><div class="props-item"><span class="label">&nbsp;</span><div class="value"><a class="recovery" id="recoveryImage" role="button">恢复默认图片</a></div></div><div class="props-item"><span class="label">开启轮播</span><div class="value"><input type="checkbox" id="fd-loop"></div></div><div class="props-item" id="fd-loop-duration_item" style="display:none"><span class="label">轮播间隔</span><div class="value has-unit px"><input type="number" min="5000" step="1000" value="10000" id="fd-loop-duration"></div></div><div class="props-item"><button type="button" id="play">播放</button></div></aside><aside class="effects" id="effectViewport"><h2 class="effects-title">特效</h2><div id="effects-wrap"></div></aside></article><script>const effects = [
       {
         name: '扩展',
         items: {
@@ -131,7 +131,49 @@
       init(options)
     }
 
-    document.getElementById('play').addEventListener('click', play)
+
+    let playerTimer = null
+
+    function start () {
+      play()
+      playerTimer && clearInterval(playerTimer)
+      const isEnableLoop = $loopSwitch.checked
+      if (isEnableLoop) {
+        const time = Math.max($loopTime.value, $fdDuration.value)
+        playerTimer = setInterval(play, time)
+        $playBtn.textContent = '停止'
+      } else {
+        $playBtn.textContent = '播放'
+      }
+    }
+
+    function stop () {
+      playerTimer && clearInterval(playerTimer)
+      playerTimer = null
+      $playBtn.textContent = '播放'
+    }
+
+    const $loopTimeWrap = document.getElementById('fd-loop-duration_item')
+    const $loopSwitch = document.getElementById('fd-loop')
+    const $loopTime = document.getElementById('fd-loop-duration')
+    const $playBtn =  document.getElementById('play')
+    $loopSwitch.addEventListener('change', function () {
+      const checked = this.checked
+      $loopTimeWrap.style.display = checked ? '' : 'none'
+    })
+
+    $playBtn.addEventListener('click', function() {
+      const isEnableLoop = $loopSwitch.checked
+      if (isEnableLoop) {
+        if (playerTimer) {
+          stop()
+        } else {
+          start()
+        }
+      } else {
+        play()
+      }
+    })
 
     // 特效切换
     const $effects = [...$effectsWrap.querySelectorAll('.effect-item')]
@@ -156,7 +198,7 @@
       if ($item) {
         const effect = $item.dataset.effect
         currentEffect = effect
-        play()
+        start()
         toggleEffectItemActive()
       }
     })
@@ -164,7 +206,7 @@
     document.getElementById('customImage').addEventListener('change', function(e) {
       const file = e.target.files[0]
       currentImage = file
-      play()
+      start()
       e.target.value = null
     })
 
@@ -173,5 +215,5 @@
         return
       }
       currentImage = DEFAULT_IMAGE
-      play()
-    })</script><script type="text/javascript" src="mo.effects.798bb37.js"></script></body></html>
+      start()
+    })</script><script type="text/javascript" src="mo.effects.a7ed30a.js"></script></body></html>

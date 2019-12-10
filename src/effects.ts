@@ -21,7 +21,8 @@ const UNCOVER_SIZE = 30
 const TOOTH_COUNT = 8
 const STACK_SCALE = 4
 const SHUTTER_COUNT = 20
-const LASER_SCALE = 25
+const LASER_SCALE = 60
+const MAX_RESOLUTION_RATIO  = 50000
 
 /**
  * 获取真实物理像素，解决高清屏模糊
@@ -401,6 +402,9 @@ export const animateStackIn = (props: AnimateProps): EngineHandler => {
       SW = RW * LASER_SCALE
       break
   }
+  SW = Math.min(MAX_RESOLUTION_RATIO, SW)
+  SH = Math.min(MAX_RESOLUTION_RATIO, SH)
+
   // 拉伸后的图
   let helper = createCanvas(SW, SH, img)
   let helperCtx = helper.getContext('2d')

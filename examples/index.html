@@ -122,6 +122,13 @@
       line-height: 20px;
     }
 
+    .props-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      position: relative;
+      cursor: pointer;
+    }
+
     .props-item button {
       display: block;
       width: 100%;
@@ -277,6 +284,21 @@
         <span class="label">&nbsp;</span>
         <div class="value"><a class="recovery" id="recoveryImage" role="button">恢复默认图片</a></div>
       </div>
+      
+      <div class="props-item">
+        <span class="label">开启轮播</span>
+        <div class="value">
+          <input type="checkbox" id="fd-loop"> 
+        </div>
+      </div>
+
+      <div class="props-item" id="fd-loop-duration_item" style="display: none;">
+        <span class="label">轮播间隔</span>
+        <div class="value has-unit px">
+          <input type="number" min="5000" step="1000" value="10000" id="fd-loop-duration">
+        </div>
+      </div>
+
       <div class="props-item">
         <button type="button" id="play">播放</button>
       </div>
@@ -423,7 +445,49 @@
       init(options)
     }
 
-    document.getElementById('play').addEventListener('click', play)
+
+    let playerTimer = null
+
+    function start () {
+      play()
+      playerTimer && clearInterval(playerTimer)
+      const isEnableLoop = $loopSwitch.checked
+      if (isEnableLoop) {
+        const time = Math.max($loopTime.value, $fdDuration.value)
+        playerTimer = setInterval(play, time)
+        $playBtn.textContent = '停止'
+      } else {
+        $playBtn.textContent = '播放'
+      }
+    }
+
+    function stop () {
+      playerTimer && clearInterval(playerTimer)
+      playerTimer = null
+      $playBtn.textContent = '播放'
+    }
+
+    const $loopTimeWrap = document.getElementById('fd-loop-duration_item')
+    const $loopSwitch = document.getElementById('fd-loop')
+    const $loopTime = document.getElementById('fd-loop-duration')
+    const $playBtn =  document.getElementById('play')
+    $loopSwitch.addEventListener('change', function () {
+      const checked = this.checked
+      $loopTimeWrap.style.display = checked ? '' : 'none'
+    })
+
+    $playBtn.addEventListener('click', function() {
+      const isEnableLoop = $loopSwitch.checked
+      if (isEnableLoop) {
+        if (playerTimer) {
+          stop()
+        } else {
+          start()
+        }
+      } else {
+        play()
+      }
+    })
 
     // 特效切换
     const $effects = [...$effectsWrap.querySelectorAll('.effect-item')]
@@ -448,7 +512,7 @@
       if ($item) {
         const effect = $item.dataset.effect
         currentEffect = effect
-        play()
+        start()
         toggleEffectItemActive()
       }
     })
@@ -456,7 +520,7 @@
     document.getElementById('customImage').addEventListener('change', function(e) {
       const file = e.target.files[0]
       currentImage = file
-      play()
+      start()
       e.target.value = null
     })
 
@@ -465,7 +529,7 @@
         return
       }
       currentImage = DEFAULT_IMAGE
-      play()
+      start()
     })
   
   </script>

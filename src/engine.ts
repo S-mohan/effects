@@ -22,7 +22,9 @@ export const engine = (handler: AnimateHandler, duration: number, easing: TweenH
   let raf: number
 
   const play:EngineHandler = () => raf = requestAnimationFrame(step)
-  play.cancel = () => raf && cancelAnimationFrame(raf)
+  play.cancel = () => {
+    raf && cancelAnimationFrame(raf)
+  }
 
   const step = (time: number) => {
     const fraction = (time - start) / duration
