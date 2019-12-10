@@ -1,4 +1,4 @@
-import { engine } from './engine'
+import { engine, EngineHandler } from './engine'
 import Tween, { TweenHandler } from './tween'
 import { AnimateProps, animateFade, animateShutter, animateUncover, animateWheel, animateTooth, animateZoomFullScreen, animateStackIn, animatePullAndSlider } from './effects'
 
@@ -114,8 +114,10 @@ const defaults: Props = {
   easing: Tween.linear
 }
 
-interface WithCustormPropsElement extends HTMLElement {
+export interface WithCustormPropsElement extends HTMLElement {
   __effect_wrap__?: HTMLElement
+  __playing__?: boolean
+  __cancel__?: Function
 }
 
 /**
@@ -140,6 +142,7 @@ const createWrap = (el: WithCustormPropsElement, width?: number, height?: number
     el.appendChild($wrap)
   }
   $wrap.style.cssText += `display:block;width:${width}px;height:${height}px;position:relative;margin:0;padding:0;overflow:hidden;`
+  $wrap.innerHTML = ''
   return $wrap
 }
 
@@ -150,7 +153,7 @@ const IMAGE_CACHES = new Map()
  * @param image 
  */
 const loadImage = (image: string | HTMLImageElement | File): Promise<HTMLImageElement> => {
-  return new Promise<HTMLImageElement| null>(resolve => {
+  return new Promise<HTMLImageElement | null>(resolve => {
 
     if (IMAGE_CACHES.has(image)) {
       resolve(IMAGE_CACHES.get(image))
@@ -169,7 +172,7 @@ const loadImage = (image: string | HTMLImageElement | File): Promise<HTMLImageEl
     else if (image instanceof File) {
       const reader = new FileReader()
       reader.readAsDataURL(image)
-      reader.onload = function(event){
+      reader.onload = function (event) {
         const img = new Image()
         img.src = event.target.result as string
         IMAGE_CACHES.set(image, img)
@@ -208,7 +211,7 @@ const animate = function ($wrap: WithCustormPropsElement, image: HTMLImageElemen
     easing: typeof easing === 'string' && Tween[easing] ? Tween[easing] : Tween.linear,
   }
 
-  let play
+  let play: EngineHandler
 
   switch (type) {
     case 'PullInUp':
@@ -263,26 +266,40 @@ const animate = function ($wrap: WithCustormPropsElement, image: HTMLImageElemen
       break
   }
 
-  play && play()
+  if (play) {
+    play()
+    $wrap.__cancel__ = play.cancel
+  }
 }
 
 
 export class Effect {
 
+  /**
+   * animate
+   * @param el 
+   * @param img 
+   * @param options 
+   */
   static animate(el: HTMLElement, img: string | HTMLImageElement | File, options: Props = defaults) {
     options = Object.assign({}, defaults, options)
     const $wrap = createWrap(el, options.width, options.height, options)
+    $wrap.__playing__ && $wrap.__cancel__ && $wrap.__cancel__()
     loadImage(img)
-      .then(image => {
-        animate($wrap, image, options)
-      })
+      .then(image => animate($wrap, image, options))
   }
 
-  static destroy () {
+  /**
+   * destroy
+   */
+  static destroy() {
     IMAGE_CACHES.clear()
   }
 
+  // engine
   static engine = engine
+
+  // Tween
   static Tween = Tween
 }
 

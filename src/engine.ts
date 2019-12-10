@@ -1,8 +1,13 @@
 import { Tween, TweenHandler } from './tween'
 
-export interface animateHandler {
+export interface AnimateHandler {
   (progress: number): void
 }
+
+export interface EngineHandler extends Function {
+  cancel: Function
+}
+
 
 /**
  * engine
@@ -10,20 +15,24 @@ export interface animateHandler {
  * @param duration 
  * @param easing 
  * @param complete 
- * @return Function
+ * @return EngineHandler
  */
-export const engine = (handler: animateHandler, duration: number, easing: TweenHandler = Tween.linear, complete?: Function): Function => {
+export const engine = (handler: AnimateHandler, duration: number, easing: TweenHandler = Tween.linear, complete?: Function): EngineHandler => {
   const start = performance.now()
   let raf: number
-  const play = () => {
-    raf = requestAnimationFrame(step)
-  }
+
+  const play:EngineHandler = () => raf = requestAnimationFrame(step)
+  play.cancel = () => raf && cancelAnimationFrame(raf)
+
   const step = (time: number) => {
     const fraction = (time - start) / duration
+    if (fraction < 0) {
+      return play()
+    }
     if (fraction > 1) {
       handler(1)
       complete && complete()
-      cancelAnimationFrame(raf)
+      play.cancel()
     }
     else {
       const progress = easing(fraction)

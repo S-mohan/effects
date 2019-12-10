@@ -1,7 +1,8 @@
-import { engine } from './engine'
+import { WithCustormPropsElement } from './'
+import { engine, EngineHandler } from './engine'
 import { TweenHandler } from './tween'
 export interface AnimateProps {
-  $el: HTMLElement
+  $el: WithCustormPropsElement
   img: HTMLImageElement
   width: number
   height: number
@@ -62,10 +63,11 @@ const createCanvas = (width: number, height: number, img?: HTMLImageElement): HT
  * @param height 
  * @param img 
  */
-export const fillCanvasBeforePlay = ($el: HTMLElement, width: number, height: number, img?: HTMLImageElement): HTMLCanvasElement => {
+export const fillCanvasBeforePlay = ($el: WithCustormPropsElement, width: number, height: number, img?: HTMLImageElement): HTMLCanvasElement => {
   const canvas = createCanvas(width, height, img)
   $el.innerHTML = ''
   $el.appendChild(canvas)
+  $el.__playing__ = true
   return canvas
 }
 
@@ -172,16 +174,16 @@ const getTransformCssText = (type: string, progress: number, width: number, heig
 }
 
 // 扩展和平移(动画使用CSS)
-export const animatePullAndSlider = (props: AnimateProps): Function => {
+export const animatePullAndSlider = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height, img)
   canvas.style.cssText += getTransformCssText(type, 0, width, height)
   const handler = (progress: number) => canvas.style.cssText += getTransformCssText(type, progress, width, height)
-  return engine(handler, duration, easing)
+  return engine(handler, duration, easing, () => $el.__playing__ = false)
 }
 
 // 渐隐渐现(动画使用CSS)
-export const animateFade = (props: AnimateProps): Function => {
+export const animateFade = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height, img)
   const fadeIn = type === 'FadeIn'
@@ -189,11 +191,12 @@ export const animateFade = (props: AnimateProps): Function => {
   const handler = (progress: number) => canvas.style.opacity = fadeIn ? `${progress}` : `${1 - progress}`
   return engine(handler, duration, easing, () => {
     canvas.style.opacity = ''
+    $el.__playing__ = false
   })
 }
 
 // 百叶窗
-export const animateShutter = (props: AnimateProps): Function => {
+export const animateShutter = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height)
   const ctx = canvas.getContext('2d')
@@ -223,11 +226,12 @@ export const animateShutter = (props: AnimateProps): Function => {
   return engine(handler, duration, easing, () => {
     helper = null
     helperCtx = null
+    $el.__playing__ = false
   })
 }
 
 // 卷轴
-export const animateUncover = (props: AnimateProps): Function => {
+export const animateUncover = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height, img)
   const ctx = canvas.getContext('2d')
@@ -260,11 +264,12 @@ export const animateUncover = (props: AnimateProps): Function => {
     helperCtx = null
     helper2 = null
     helper2Ctx = null
+    $el.__playing__ = false
   })
 }
 
 // 滚轮
-export const animateWheel = (props: AnimateProps): Function => {
+export const animateWheel = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing } = props
   const canvas = fillCanvasBeforePlay($el, width, height)
   const ctx = canvas.getContext('2d')
@@ -287,11 +292,12 @@ export const animateWheel = (props: AnimateProps): Function => {
 
   return engine(handler, duration, easing, () => {
     helper = null
+    $el.__playing__ = false
   })
 }
 
 // 咬合
-export const animateTooth = (props: AnimateProps): Function => {
+export const animateTooth = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing } = props
   const canvas = fillCanvasBeforePlay($el, width, height)
   const ctx = canvas.getContext('2d')
@@ -331,11 +337,12 @@ export const animateTooth = (props: AnimateProps): Function => {
   return engine(handler, duration, easing, () => {
     helper = null
     helperCtx = null
+    $el.__playing__ = false
   })
 }
 
 // 变焦全屏
-export const animateZoomFullScreen = (props: AnimateProps): Function => {
+export const animateZoomFullScreen = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing } = props
   const canvas = fillCanvasBeforePlay($el, width, height)
   const ctx = canvas.getContext('2d')
@@ -364,11 +371,12 @@ export const animateZoomFullScreen = (props: AnimateProps): Function => {
   return engine(handler, duration, easing, () => {
     helper = null
     helperCtx = null
+    $el.__playing__ = false
   })
 }
 
 // 堆积和镭射
-export const animateStackIn = (props: AnimateProps): Function => {
+export const animateStackIn = (props: AnimateProps): EngineHandler => {
   const { $el, width, height, img, duration, easing, type } = props
   const canvas = fillCanvasBeforePlay($el, width, height)
   const ctx = canvas.getContext('2d')
@@ -480,5 +488,6 @@ export const animateStackIn = (props: AnimateProps): Function => {
   return engine(handler, duration, easing, () => {
     helper = null
     helperCtx = null
+    $el.__playing__ = false
   })
 }
