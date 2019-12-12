@@ -17,12 +17,13 @@ export interface AnimateCallback {
 
 const DEVICE_PIXEL_RATIO = window.devicePixelRatio || 1
 const PRESS_RATIO = 15
-const UNCOVER_SIZE = 30
+const UNCOVER_SIZE = 30 * DEVICE_PIXEL_RATIO | 0
 const TOOTH_COUNT = 8
 const STACK_SCALE = 4
-const SHUTTER_COUNT = 20
+const SHUTTER_COUNT = 16
 const LASER_SCALE = 60
-const MAX_RESOLUTION_RATIO  = 50000
+// Mac电脑超过20000会有卡顿，这里设置个最大的阈值，并且和设备分辨率关联
+const MAX_RESOLUTION_RATIO  = 40000 / DEVICE_PIXEL_RATIO | 0
 
 /**
  * 获取真实物理像素，解决高清屏模糊
