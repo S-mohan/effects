@@ -254,10 +254,10 @@ export const animateUncover = (props: AnimateProps): EngineHandler => {
     let y1 = isFromTop ? (RH - h - UNCOVER_SIZE) : (h + UNCOVER_SIZE)
     y1 = Math.max(0, Math.min(y1, RH - UNCOVER_SIZE))
     const imageData = helper2Ctx.getImageData(0, y1, RW, UNCOVER_SIZE)
-    ctx.putImageData(imageData, 0, isFromTop ? h - 1 : RH - h - UNCOVER_SIZE)
+    ctx.putImageData(imageData, 0, isFromTop ? h - 1 : RH - h - UNCOVER_SIZE + 1)
     if (h >= 1) {
       const mainData = helperCtx.getImageData(0, isFromTop ? 0 : RH - h, RW, h)
-      ctx.putImageData(mainData, 0, isFromTop ? 0 : RH - h)
+      ctx.putImageData(mainData, 0, isFromTop ? 0 : RH - h + 1)
     }
   }
 
