@@ -1,6 +1,8 @@
-# effects
+# Effects
 
-## 实现终端40种播放特效
+> 基于canvas实现的包括卷轴，激光镭射，百叶窗，齿合，堆积等40余种图片转场过渡效果集合。
+
+### 支持效果
 
 - Random 随机
 - PullInUp 向上扩展
@@ -37,6 +39,41 @@
 - BottomLaser 下镭射
 - RightLaser 右镭射
 - LeftLaser 左镭射
+
+### 如何使用
+### Html
+```html
+<div id="canvas"></div>
+<script src="dist/mo.effects.c79ef24.js"></script>
+<script>
+window.MoEffects.animate(document.getElementById('canvas'), 'https://smohan.oss-cn-beijing.aliyuncs.com/test/boy-child-cute-35537.jpg', {
+ width: 500,
+ height: 500,
+ duration: 2000,
+ easing: 'linear',
+ type: 'UncoverFromTop'
+})
+</script>
+```
+### API
+```typescript
+animate(el: HTMLElement, img: string | HTMLImageElement | File, options?: Props)
+```
+### Options
+```typescript
+{
+  // 动画类型
+  type: EffectType
+  // 特效时长, 单位毫秒
+  duration: number
+  // 容器宽度
+  width?: number
+  // 容器高度
+  height?: number
+  // 缓动类型
+  easing?: TweenHandler
+}
+```
 
 ## Example
 #### [https://s-mohan.github.io/effects/index.html](https://s-mohan.github.io/effects/index.html)
